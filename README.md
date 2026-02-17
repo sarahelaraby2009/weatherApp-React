@@ -6,20 +6,7 @@ A modern, responsive weather application built with React and Vite that provides
 
 **[Access the Live Application](https://benevolent-tarsier-d586c2.netlify.app)**
 
-## 🎬 Getting Started / Demo
 
-![Weather App Demo](https://via.placeholder.com/800x400?text=Weather+App+Demo+GIF+Here)
-
-*Replace the placeholder above with an animated GIF showing:*
-- *Language switching between English and Arabic*
-- *City selection dropdown*
-- *Real-time weather data display*
-- *Responsive design on different screen sizes*
-
-**How to create a GIF:**
-- Use [ScreenToGif](https://www.screentogif.com/) or [Gifski](https://gifski.app/)
-- Record a 30-second demo of the app in action
-- Compress and add to your GitHub repo
 
 ## ✨ Features
 
@@ -243,4 +230,3 @@ For questions or support, please reach out through the repository issues page.
 
 ---
 
-**Built with ❤️ using React and Vite**
