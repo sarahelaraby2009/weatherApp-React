@@ -1,0 +1,14 @@
+{
+    "cities":{
+        "cairo":"Cairo",
+        "alex":"Alexandira",
+        "giza":"Giza",
+        "aswan":"Aswan",
+        "luxor":"Luxor",
+        "portsaid":"Portsaid",
+        "suez":"Suez",
+        "ismailia":"Ismailia",
+        "tanta":"Tanta",
+        "mansoura":"Mansoura"
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "cities":{
+        "cairo":"القاهره",
+        "alex":"الاسكندرية",
+        "giza":"الجيزة",
+        "aswan":"اسوان",
+        "luxor":"الاقصر",
+        "portsaid":"بورسعيد",
+        "suez":"السويس",
+        "ismailia":"الاسماعيليه",
+        "tanta":"طنطا",
+        "mansoura":"المنصورة"
+    },
+    "min":"الصغرى",
+    "max":"الكبرى",
+   
+ 
+    "clear sky":"سماء صافية",
+    "few clouds": "غيوم قليلة",
+    "scattered clouds": "غيوم متفرقة",
+    "broken clouds": "غيوم كثيفة جزئيًا",
+    "shower rain": "أمطار متفرقة",
+    "rain": "أمطار",
+    "thunderstorm": "عاصفة رعدية",
+    "snow": "ثلج",
+    "mist": "شبورة",
+    "overcast clouds":"غيوم كثيفة"
+ 
+
+}

@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react'
-import BasicButtons from './components/test.jsx'
 import './App.css'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+// MUI IMPORTS
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import FilterDramaIcon from '@mui/icons-material/FilterDrama';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-
+// Axios Import
 import axios from 'axios';
+// DAYJS IMPORTS
 import dayjs from "dayjs"
 import utc from 'dayjs/plugin/utc'
+import 'dayjs/locale/ar'
+import 'dayjs/locale/en'
 dayjs.extend(utc);
+// I18 IMPORTS
+import i18next from './i18n'
+import { useTranslation } from 'react-i18next';
+
+
 const theme = createTheme({
   typography: {
     fontFamily: ["quick"]
@@ -20,16 +28,16 @@ const theme = createTheme({
 })
 
 const EGYPT_CITIES = [
-  { name: 'القاهرة', lat: 30.03, lon: 31.23 },
-  { name: 'الإسكندرية', lat: 31.20, lon: 29.92 },
-  { name: 'الجيزة', lat: 30.01, lon: 31.21 },
-  { name: 'أسوان', lat: 24.09, lon: 32.91 },
-  { name: 'الأقصر', lat: 25.69, lon: 32.64 },
-  { name: 'بورسعيد', lat: 31.26, lon: 32.30 },
-  { name: 'السويس', lat: 29.97, lon: 32.55 },
-  { name: 'الإسماعيلية', lat: 30.58, lon: 32.27 },
-  { name: 'طنطا', lat: 30.79, lon: 31.00 },
-  { name: 'المنصورة', lat: 31.04, lon: 31.38 }
+  { key: 'cairo', lat: 30.03, lon: 31.23 },
+  { key: 'alex', lat: 31.20, lon: 29.92 },
+  { key: 'giza', lat: 30.01, lon: 31.21 },
+  { key: 'aswan', lat: 24.09, lon: 32.91 },
+  { key: 'luxor', lat: 25.69, lon: 32.64 },
+  { key: 'portsaid', lat: 31.26, lon: 32.30 },
+  { key: 'suez', lat: 29.97, lon: 32.55 },
+  { key: 'ismailia', lat: 30.58, lon: 32.27 },
+  { key: 'tanta', lat: 30.79, lon: 31.00 },
+  { key: 'mansoura', lat: 31.04, lon: 31.38 }
 ]
 function App() {
   const [Temp, setTemp] = useState({
@@ -41,10 +49,22 @@ function App() {
   })
   const [city, setCity] = useState(EGYPT_CITIES[0])
   const [date, setDate] = useState("")
-
+  const { t, i18n } = useTranslation();
+  const [locale,setLocale]=useState("ar")
+  console.log(t("cities.cairo"))
 
   console.log(date)
-
+  const handleLanguageClick= ()=> {
+    if(i18n.language=="ar"){
+       i18n.changeLanguage("en")
+    }
+    else if(i18n.language=="en"){
+       i18n.changeLanguage("ar")
+    }
+  }
+  useEffect(() => {
+        setDate(dayjs().locale(i18n.language).format("DD MMMM YYYY"))
+  },[i18n.language])
   useEffect(() => {
     const controller = new AbortController();
     axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=93bda17f51e804e72fb5d3df7a9530b3`, { signal: controller.signal })
@@ -57,7 +77,6 @@ function App() {
         const description = data.weather?.[0]?.description || ""
         const icon = data.weather?.[0]?.icon || ""
         setTemp({ number: getTemp, min, max, description, icon: `https://openweathermap.org/img/wn/${icon}@2x.png` })
-        setDate(dayjs.utc().format('DD MMMM YYYY'))
 
         console.log(response.data);
       })
@@ -79,12 +98,12 @@ function App() {
         <Container maxWidth="sm"  >
 
           <div style={{ backgroundColor: "#F7B731", padding: "5px", marginBottom: "10px", width: "auto", height: "auto",borderRadius:"20px" }}>
-            <div dir='rtl' style={{ display: "flex", gap: "20px", alignItems: "end", justifyContent: "space-evenly", borderBottom: "1px white solid" }}>
+            <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ display: "flex", gap: "20px", alignItems: "end", justifyContent: "space-evenly", borderBottom: "1px white solid" }}>
 
               <Autocomplete
                 disablePortal
                 options={EGYPT_CITIES}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={(option) => t(`cities.${option.key}`)}
                 sx={{ width: 200, margin: "5px",color:"white" }}
                 value={city}
                 onChange={(e, selectedValue) => { setCity(selectedValue) }}
@@ -94,7 +113,7 @@ function App() {
 
                   return (
                     <li key={key} {...rest} style={{ color: "black" }}>
-                      {option.name}
+                      {t(`cities.${option.key}`)}
                     </li>
                   )
                 }}
@@ -102,9 +121,9 @@ function App() {
               />
 
 
-              <Typography variant='h6'>{date}</Typography>
+              <Typography  variant='h6'>{date}</Typography>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px" }}>
+            <div dir={i18n.language=="en" ? "rtl" : "ltr"} style={{ display: "flex", justifyContent: "space-between", padding: "10px" }}>
               <div style={{ fontSize: "30px" }}>
                 <FilterDramaIcon style={{ fontSize: "200px", color: "white" }} />
               </div>
@@ -113,11 +132,11 @@ function App() {
                   <img src={Temp.icon} />
                   <Typography variant='h1'>{Temp.number}</Typography>
                 </div>
-                <div style={{ marginBottom: "10px" }}>
-                  <Typography variant='h5'>{Temp.description}</Typography>
+                <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ marginBottom: "10px" }}>
+                  <Typography variant='h5'>{t(Temp.description.toLowerCase())}</Typography>
                 </div>
-                <div style={{ marginBottom: "10px" }}>
-                  <Typography variant='h5'>الكبرى:{Temp.max}  | الصغرى:{Temp.min}</Typography>
+                <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ marginBottom: "10px" }}>
+                  <Typography sx={{fontSize:"12px"}}>{t("max")}:{Temp.max}  | {t("min")}:{Temp.min}</Typography>
                 </div>
 
               </div>
@@ -125,8 +144,8 @@ function App() {
             </div>
 
           </div>
-          <Button sx={{ color: "#fff", borderColor: "#ffff" }} variant="outlined" size="small">
-            العربى
+          <Button onClick={handleLanguageClick} sx={{ color: "#fff", borderColor: "#ffff" }} variant="outlined" size="small">
+            {i18n.language=="ar" ? "انجليزى" : "Arabic"}
           </Button>
         </Container>
       </ThemeProvider>
