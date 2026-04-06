@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 
 const theme = createTheme({
   typography: {
-    fontFamily: ["quick"]
+    fontFamily: ["quick", "sans-serif"].join(",")
   }
 })
 
@@ -39,6 +39,7 @@ const EGYPT_CITIES = [
   { key: 'tanta', lat: 30.79, lon: 31.00 },
   { key: 'mansoura', lat: 31.04, lon: 31.38 }
 ]
+
 function App() {
   const [Temp, setTemp] = useState({
     number: null,
@@ -50,106 +51,115 @@ function App() {
   const [city, setCity] = useState(EGYPT_CITIES[0])
   const [date, setDate] = useState("")
   const { t, i18n } = useTranslation();
-  const [locale,setLocale]=useState("ar")
-  console.log(t("cities.cairo"))
+  const isRtl = i18n.language === "ar"
 
-  console.log(date)
-  const handleLanguageClick= ()=> {
-    if(i18n.language=="ar"){
-       i18n.changeLanguage("en")
-    }
-    else if(i18n.language=="en"){
-       i18n.changeLanguage("ar")
+  const handleLanguageClick = () => {
+    if (i18n.language === "ar") {
+      i18n.changeLanguage("en")
+    } else {
+      i18n.changeLanguage("ar")
     }
   }
+
   useEffect(() => {
-        setDate(dayjs().locale(i18n.language).format("DD MMMM YYYY"))
-  },[i18n.language])
+    setDate(dayjs().locale(i18n.language).format("DD MMMM YYYY"))
+  }, [i18n.language])
+
   useEffect(() => {
     const controller = new AbortController();
-    axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=93bda17f51e804e72fb5d3df7a9530b3`, { signal: controller.signal })
+    axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=93bda17f51e804e72fb5d3df7a9530b3`,
+      { signal: controller.signal }
+    )
       .then(function (response) {
         const data = response.data
         if (!data.weather || data.weather.length === 0) return
-        const getTemp = Math.round(response.data.main.temp - 273.15)
-        const min = Math.round(response.data.main.temp_min - 273.15)
-        const max = Math.round(response.data.main.temp_max - 273.15)
+        const getTemp = Math.round(data.main.temp - 273.15)
+        const min = Math.round(data.main.temp_min - 273.15)
+        const max = Math.round(data.main.temp_max - 273.15)
         const description = data.weather?.[0]?.description || ""
         const icon = data.weather?.[0]?.icon || ""
         setTemp({ number: getTemp, min, max, description, icon: `https://openweathermap.org/img/wn/${icon}@2x.png` })
-
-        console.log(response.data);
       })
       .catch(function (error) {
-
-        if (error.name === "CanceledError") {
-          console.log("request canceled")
-        } else { console.log(error); }
+        if (error.name !== "CanceledError") console.log(error)
       })
-    return () => {
-      console.log("cancelling")
-      controller.abort()
-    }
+    return () => controller.abort()
   }, [city])
+
   return (
-
-    <div className='App' >
+    <div className='App'>
       <ThemeProvider theme={theme}>
-        <Container maxWidth="sm"  >
+        <Container maxWidth="sm" disableGutters sx={{ px: { xs: 0, sm: 2 } }}>
+          <div className="weather-card">
 
-          <div style={{ backgroundColor: "#F7B731", padding: "5px", marginBottom: "10px", width: "auto", height: "auto",borderRadius:"20px" }}>
-            <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ display: "flex", gap: "20px", alignItems: "end", justifyContent: "space-evenly", borderBottom: "1px white solid" }}>
-
+            {/* ── HEADER: city picker + date ── */}
+            <div className="card-header" dir={isRtl ? "rtl" : "ltr"}>
               <Autocomplete
                 disablePortal
                 options={EGYPT_CITIES}
                 getOptionLabel={(option) => t(`cities.${option.key}`)}
-                sx={{ width: 200, margin: "5px",color:"white" }}
+                className="city-select"
+                sx={{ width: { xs: '100%', sm: 200 } }}
                 value={city}
-                onChange={(e, selectedValue) => { setCity(selectedValue) }}
-                renderInput={(params) => <TextField {...params} label="City" />}
+                onChange={(e, selectedValue) => { if (selectedValue) setCity(selectedValue) }}
+                renderInput={(params) => <TextField {...params} label={isRtl ? "المدينة" : "City"} />}
                 renderOption={(props, option) => {
                   const { key, ...rest } = props
-
                   return (
-                    <li key={key} {...rest} style={{ color: "black" }}>
+                    <li key={key} {...rest} style={{ color: "#1a1a2e", fontFamily: "quick, sans-serif" }}>
                       {t(`cities.${option.key}`)}
                     </li>
                   )
                 }}
-
               />
-
-
-              <Typography  variant='h6'>{date}</Typography>
+              <Typography className="date-text">{date}</Typography>
             </div>
-            <div dir={i18n.language=="en" ? "rtl" : "ltr"} style={{ display: "flex", justifyContent: "space-between", padding: "10px" }}>
-              <div style={{ fontSize: "30px" }}>
-                <FilterDramaIcon style={{ fontSize: "200px", color: "white" }} />
-              </div>
-              <div style={{ marginBottom: "10px" }}>
-                <div style={{ display: "flex", gap: "20px" }}>
-                  <img src={Temp.icon} />
-                  <Typography variant='h1'>{Temp.number}</Typography>
-                </div>
-                <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ marginBottom: "10px" }}>
-                  <Typography variant='h5'>{t(Temp.description.toLowerCase())}</Typography>
-                </div>
-                <div dir={i18n.language=="ar" ? "rtl" : "ltr"} style={{ marginBottom: "10px" }}>
-                  <Typography sx={{fontSize:"12px"}}>{t("max")}:{Temp.max}  | {t("min")}:{Temp.min}</Typography>
-                </div>
 
+            {/* ── BODY: icon + temperature ── */}
+            <div className="card-body" dir={isRtl ? "ltr" : "rtl"}>
+              <div className="weather-icon-wrap">
+                <FilterDramaIcon className="cloud-icon" />
+                <Typography className="weather-condition">
+                  {Temp.description ? t(Temp.description.toLowerCase()) : "—"}
+                </Typography>
               </div>
 
+              <div className="temp-block" dir={isRtl ? "rtl" : "ltr"}>
+                <div className="temp-row">
+                  {Temp.icon && <img src={Temp.icon} alt="weather icon" className="weather-img" />}
+                  <Typography className="temp-number">
+                    {Temp.number !== null ? Temp.number : "--"}
+                  </Typography>
+                  <span className="temp-unit">°C</span>
+                </div>
+
+                {Temp.max !== null && (
+                  <div className="minmax-row">
+                    <div className="minmax-item">
+                      <Typography className="minmax-label">{t("max")}</Typography>
+                      <Typography className="minmax-value">{Temp.max}°</Typography>
+                    </div>
+                    <div className="divider" />
+                    <div className="minmax-item">
+                      <Typography className="minmax-label">{t("min")}</Typography>
+                      <Typography className="minmax-value">{Temp.min}°</Typography>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── FOOTER: language toggle ── */}
+            <div className="card-footer">
+              <Button onClick={handleLanguageClick} className="lang-btn" variant="outlined" size="small">
+                {isRtl ? "English" : "عربى"}
+              </Button>
             </div>
 
           </div>
-          <Button onClick={handleLanguageClick} sx={{ color: "#fff", borderColor: "#ffff" }} variant="outlined" size="small">
-            {i18n.language=="ar" ? "انجليزى" : "Arabic"}
-          </Button>
         </Container>
       </ThemeProvider>
-
     </div>
   )
 }

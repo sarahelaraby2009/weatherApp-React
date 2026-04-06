@@ -6,7 +6,7 @@ A modern, responsive weather application built with React and Vite that provides
 
 **[Access the Live Application](https://benevolent-tarsier-d586c2.netlify.app)**
 
-
+ 
 
 ## ✨ Features
 
